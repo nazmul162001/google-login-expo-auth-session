@@ -1,3 +1,4 @@
+import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
@@ -17,31 +18,39 @@ interface GoogleUserInfo {
 }
 
 export default function HomeScreen(): JSX.Element {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [userInfo, setUserInfo] = useState<GoogleUserInfo | null>(null);
-  console.log(userInfo, "get-user-info");
+
+  // ✅ Use different redirect URIs for web and mobile
+  const redirectUri = AuthSession.makeRedirectUri({
+    useProxy: false, // ✅ Use `false` for native apps
+  });
+  console.log("Current Redirect URI:", redirectUri);
+
   const [request, response, promptAsync] = Google.useAuthRequest({
-    // @ts-ignore
-    expoClientId:
-      "722035899076-k3besee06cdk5ns6pv8i84u5bhvvj6kp.apps.googleusercontent.com",
     androidClientId:
       "722035899076-tseqr666gfn51m27heh05fkagis3viqq.apps.googleusercontent.com",
     iosClientId:
       "722035899076-cctnhad1073un9jv2cja64icpm7hbh8t.apps.googleusercontent.com",
     webClientId:
       "722035899076-k3besee06cdk5ns6pv8i84u5bhvvj6kp.apps.googleusercontent.com",
-    responseType: "token",
+    responseType: "code", // ✅ Use `code` instead of `token`
     scopes: ["profile", "email"],
+    redirectUri: redirectUri, // ✅ Use correct redirect URI
   });
 
   useEffect(() => {
+    handleSignInResponse();
+  }, [response]);
+
+  const handleSignInResponse = async () => {
     if (response?.type === "success") {
-      setAccessToken(response.authentication?.accessToken || null);
-      getUserData(response.authentication?.accessToken);
+      console.log("Auth Response:", response);
+      const token = response.authentication?.accessToken;
+      await getUserData(token);
     } else if (response?.type === "error") {
       console.error("Authentication error:", response.error);
     }
-  }, [response]);
+  };
 
   const getUserData = async (token: string | undefined) => {
     if (!token) return;
@@ -53,8 +62,13 @@ export default function HomeScreen(): JSX.Element {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const data = await userInfoResponse.json();
-      setUserInfo(data);
+
+      if (!userInfoResponse.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const userData: GoogleUserInfo = await userInfoResponse.json();
+      setUserInfo(userData);
     } catch (error) {
       console.error("Error fetching user info:", error);
     }
@@ -72,7 +86,6 @@ export default function HomeScreen(): JSX.Element {
   };
 
   const handleSignOut = () => {
-    setAccessToken(null);
     setUserInfo(null);
   };
 
@@ -87,10 +100,12 @@ export default function HomeScreen(): JSX.Element {
       ) : (
         <View style={styles.userInfoContainer}>
           <Text style={styles.welcomeText}>Welcome! {userInfo?.name}</Text>
-          <Image
-            source={{ uri: userInfo.picture }}
-            style={styles.profilePicture}
-          />
+          {userInfo.picture && (
+            <Image
+              source={{ uri: userInfo.picture }}
+              style={styles.profilePicture}
+            />
+          )}
           <View style={styles.userDetails}>
             <Text style={styles.nameText}>Full Name: {userInfo.name}</Text>
             <Text style={styles.infoText}>
