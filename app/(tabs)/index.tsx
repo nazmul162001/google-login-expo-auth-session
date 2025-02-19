@@ -1,8 +1,16 @@
+import FacebookLogin from "@/components/facebook/FacebookLogin";
 import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
-import { Button, Image, StyleSheet, Text, View } from "react-native";
+import {
+  Button,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 // Required for web browser redirect
 WebBrowser.maybeCompleteAuthSession();
@@ -22,6 +30,7 @@ export default function HomeScreen(): JSX.Element {
 
   // ✅ Use different redirect URIs for web and mobile
   const redirectUri = AuthSession.makeRedirectUri({
+    // @ts-ignore
     useProxy: false, // ✅ Use `false` for native apps
   });
   console.log("Current Redirect URI:", redirectUri);
@@ -92,11 +101,18 @@ export default function HomeScreen(): JSX.Element {
   return (
     <View style={styles.container}>
       {!userInfo ? (
-        <Button
-          title="Sign In With Google"
-          onPress={handleSignIn}
-          disabled={!request}
-        />
+        <>
+          <View style={styles.facebookContainer}>
+            <TouchableOpacity
+              style={[styles.button, !request && styles.disabledButton]}
+              onPress={handleSignIn}
+              disabled={!request}
+            >
+              <Text style={styles.buttonText}>Sign In With Google</Text>
+            </TouchableOpacity>
+          </View>
+          <FacebookLogin />
+        </>
       ) : (
         <View style={styles.userInfoContainer}>
           <Text style={styles.welcomeText}>Welcome! {userInfo?.name}</Text>
@@ -168,5 +184,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     color: "#333",
+  },
+
+  facebookContainer: {
+    marginTop: 20,
+    width: 250, // Fixed width
+    height: 50, // Fixed height
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  button: {
+    backgroundColor: "#DB4437", // Google red color
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  disabledButton: {
+    backgroundColor: "#cccccc", // Greyed-out when disabled
   },
 });
