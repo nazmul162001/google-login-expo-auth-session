@@ -6,18 +6,53 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "com.nazmul1140.googlelogin",
+    "facebookScheme": "fb1793342164818323",
+    "facebookAppId": "1793342164818323",
+    "facebookDisplayName": "google-login",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nazmul1140.googlelogin"
+      "bundleIdentifier": "com.nazmul1140.googlelogin",
+      "runtimeVersion": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.nazmul1140.googlelogin"
+      "package": "com.nazmul1140.googlelogin",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.nazmul1140.googlelogin"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.nazmul1140.googlelogin"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -46,6 +81,9 @@
       "eas": {
         "projectId": "4e84c79a-aa28-4415-bb65-8fc63d76b337"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4e84c79a-aa28-4415-bb65-8fc63d76b337"
     }
   }
 }
